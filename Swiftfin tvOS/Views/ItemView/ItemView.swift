@@ -34,6 +34,8 @@ struct ItemView: View {
             return MovieItemViewModel(item: item)
         case .series:
             return SeriesItemViewModel(item: item)
+        case .person, .musicArtist:
+            return PersonItemViewModel(item: item)
         default:
             assertionFailure("Unsupported item")
             return ItemViewModel(item: item)
@@ -55,6 +57,8 @@ struct ItemView: View {
             MovieItemContentView(viewModel: viewModel as! MovieItemViewModel)
         case .series:
             SeriesItemContentView(viewModel: viewModel as! SeriesItemViewModel)
+        case .person, .musicArtist:
+            PersonItemContentView(viewModel: viewModel as! PersonItemViewModel)
         default:
             Text(L10n.notImplementedYetWithType(viewModel.item.type ?? "--"))
         }

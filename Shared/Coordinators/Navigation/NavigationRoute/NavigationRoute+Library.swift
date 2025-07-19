@@ -25,11 +25,20 @@ extension NavigationRoute {
     static func library(
         viewModel: PagingLibraryViewModel<some Poster>
     ) -> NavigationRoute {
+        #if os(tvOS)
+        NavigationRoute(
+            id: "library-(\(viewModel.parent?.id ?? "Unparented"))",
+            style: .fullscreen
+        ) {
+            PagingLibraryView(viewModel: viewModel)
+        }
+        #else
         NavigationRoute(
             id: "library-(\(viewModel.parent?.id ?? "Unparented"))",
             withNamespace: { .push(.zoom(sourceID: "item", namespace: $0)) }
         ) {
             PagingLibraryView(viewModel: viewModel)
         }
+        #endif
     }
 }

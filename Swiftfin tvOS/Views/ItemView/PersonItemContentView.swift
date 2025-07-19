@@ -7,14 +7,17 @@
 //
 
 import JellyfinAPI
+import OrderedCollections
 import SwiftUI
 
 extension ItemView {
 
-    struct CollectionItemContentView: View {
+    struct PersonItemContentView: View {
+
+        typealias Element = OrderedDictionary<BaseItemKind, ItemLibraryViewModel>.Elements.Element
 
         @ObservedObject
-        var viewModel: CollectionItemViewModel
+        var viewModel: PersonItemViewModel
 
         @Router
         private var router
@@ -24,6 +27,8 @@ extension ItemView {
 
                 ItemView.CinematicHeaderView(viewModel: viewModel)
                     .padding(.bottom, 50)
+
+                // MARK: - Items by Type
 
                 ForEach(viewModel.sections.elements, id: \.key) { element in
                     if element.value.elements.isNotEmpty {
@@ -35,10 +40,6 @@ extension ItemView {
                             router.route(to: .item(item: item))
                         }
                     }
-                }
-
-                if viewModel.similarItems.isNotEmpty {
-                    ItemView.SimilarItemsHStack(items: viewModel.similarItems)
                 }
 
                 ItemView.AboutView(viewModel: viewModel)
