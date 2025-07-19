@@ -28,7 +28,7 @@ extension ItemView {
 
         var body: some View {
             ZStack {
-                if viewModel.item.type == .episode {
+                if viewModel.item.type == .episode || viewModel.item.type == .person || viewModel.item.type == .musicArtist {
                     ImageView(viewModel.item.imageSource(.primary, maxWidth: 1920))
                 } else {
                     ImageView(viewModel.item.imageSource(.backdrop, maxWidth: 1920))
