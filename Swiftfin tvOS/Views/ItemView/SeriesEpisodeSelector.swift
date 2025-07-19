@@ -25,7 +25,6 @@ extension ItemView {
 
                 ItemView.CinematicHeaderView(viewModel: viewModel)
                     .focusGuide(focusGuide, tag: "top", bottom: "seasons")
-                    .frame(height: UIScreen.main.bounds.height - 150)
                     .padding(.bottom, 50)
 
                 if viewModel.seasons.isNotEmpty {

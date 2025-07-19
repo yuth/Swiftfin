@@ -22,7 +22,6 @@ extension ItemView {
             VStack(spacing: 0) {
 
                 ItemView.CinematicHeaderView(viewModel: viewModel)
-                    .frame(height: UIScreen.main.bounds.height - 150)
                     .padding(.bottom, 50)
 
                 if let castAndCrew = viewModel.item.people, castAndCrew.isNotEmpty {

@@ -23,7 +23,6 @@ extension ItemView {
             VStack(spacing: 0) {
 
                 ItemView.CinematicHeaderView(viewModel: viewModel)
-                    .frame(height: UIScreen.main.bounds.height - 150)
                     .padding(.bottom, 50)
 
                 ForEach(viewModel.sections.elements, id: \.key) { element in

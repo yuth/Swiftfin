@@ -169,12 +169,21 @@ extension NavigationRoute {
     #endif
 
     static func item(item: BaseItemDto) -> NavigationRoute {
+        #if os(tvOS)
+        NavigationRoute(
+            id: "item-\(item.id ?? "Unknown")",
+            style: .fullscreen
+        ) {
+            ItemView(item: item)
+        }
+        #else
         NavigationRoute(
             id: "item-\(item.id ?? "Unknown")",
             withNamespace: { .push(.zoom(sourceID: "item", namespace: $0)) }
         ) {
             ItemView(item: item)
         }
+        #endif
     }
 
     #if os(iOS)
