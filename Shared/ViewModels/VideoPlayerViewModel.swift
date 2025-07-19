@@ -11,6 +11,7 @@ import Factory
 import Files
 import Foundation
 import JellyfinAPI
+import Logging
 import UIKit
 import VLCUI
 
@@ -63,7 +64,14 @@ final class VideoPlayerViewModel: ViewModel {
 
     // TODO: should start time be from the media source instead?
     var vlcVideoPlayerConfiguration: VLCVideoPlayer.Configuration {
-        let configuration = VLCVideoPlayer.Configuration(url: playbackURL)
+        let configURL: URL
+        if playMethod == .transcode {
+            configURL = playbackURL
+        } else {
+            configURL = playbackURL
+        }
+
+        let configuration = VLCVideoPlayer.Configuration(url: configURL)
         configuration.autoPlay = true
         configuration.startTime = .seconds(max(0, item.startTimeSeconds - Defaults[.VideoPlayer.resumeOffset]))
         if self.audioStreams[0].path != nil {
@@ -123,6 +131,18 @@ final class VideoPlayerViewModel: ViewModel {
 
     func chapter(from seconds: Int) -> ChapterInfo.FullInfo? {
         chapters.first(where: { $0.secondsRange.contains(seconds) })
+    }
+
+    /// Returns the runtime in seconds, preferring media source runtime for HLS streams
+    var runtimeSeconds: Int {
+        // For HLS streams, prefer the media source runtime if available
+        if mediaSource.container?.lowercased() == "hls",
+           let runTimeTicks = mediaSource.runTimeTicks
+        {
+            return Int(runTimeTicks / 10_000_000)
+        }
+        // Otherwise use the item's runtime
+        return item.runTimeSeconds
     }
 }
 

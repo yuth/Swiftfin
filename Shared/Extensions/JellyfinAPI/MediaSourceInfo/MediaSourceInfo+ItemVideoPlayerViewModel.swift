@@ -10,6 +10,7 @@ import Defaults
 import Factory
 import Foundation
 import JellyfinAPI
+import Logging
 import UIKit
 
 // TODO: strongly type errors
@@ -17,16 +18,27 @@ import UIKit
 extension MediaSourceInfo {
 
     func videoPlayerViewModel(with item: BaseItemDto, playSessionID: String) throws -> VideoPlayerViewModel {
+        let logger = Logger.swiftfin()
+        logger.info("Creating VideoPlayerViewModel for item: \(item.name ?? "Unknown")")
+        logger.debug("Media source - Container: \(container ?? "nil"), SupportsDirectPlay: \(isSupportsDirectPlay?.description ?? "nil")")
+        logger.debug("Transcoding URL present: \(transcodingURL != nil)")
 
         let userSession: UserSession! = Container.shared.currentUserSession()
         let playbackURL: URL
         let playMethod: PlayMethod
 
+        // For HLS containers that don't support direct play, always use transcoding URL
         if let transcodingURL {
+            logger.info("Using transcoding URL from media source")
             guard let fullTranscodeURL = userSession.client.fullURL(with: transcodingURL)
             else { throw JellyfinAPIError("Unable to make transcode URL") }
             playbackURL = fullTranscodeURL
             playMethod = .transcode
+            logger.debug("Transcoding URL: \(playbackURL)")
+        } else if container?.lowercased() == "hls" && (isSupportsDirectPlay == false || isSupportsDirectPlay == nil) {
+            // HLS content that doesn't support direct play should use transcoding
+            logger.error("HLS content requires transcoding URL but none provided")
+            throw JellyfinAPIError("HLS content requires transcoding URL but none provided")
         } else {
             let videoStreamParameters = Paths.GetVideoStreamParameters(
                 isStatic: true,

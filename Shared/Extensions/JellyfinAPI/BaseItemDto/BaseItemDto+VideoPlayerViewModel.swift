@@ -29,7 +29,14 @@ extension BaseItemDto {
 
         let userSession = Container.shared.currentUserSession()!
 
-        let playbackInfo = PlaybackInfoDto(deviceProfile: profile)
+        // For HLS containers, disable direct play to force transcoding
+        let enableDirectPlay = mediaSource.container?.lowercased() != "hls"
+
+        let playbackInfo = PlaybackInfoDto(
+            deviceProfile: profile,
+            enableDirectPlay: enableDirectPlay,
+            enableDirectStream: enableDirectPlay
+        )
         let playbackInfoParameters = Paths.GetPostedPlaybackInfoParameters(
             userID: userSession.user.id,
             maxStreamingBitrate: maxBitrate,
@@ -44,11 +51,26 @@ extension BaseItemDto {
 
         let response = try await userSession.client.send(request)
 
+        let logger = Logger.swiftfin()
+        logger.info("PlaybackInfo response received")
+        logger.debug("Media sources count: \(response.value.mediaSources?.count ?? 0)")
+
+        if let mediaSources = response.value.mediaSources {
+            for (index, ms) in mediaSources.enumerated() {
+                logger
+                    .debug(
+                        "MediaSource \(index): ID=\(ms.id ?? "nil"), Container=\(ms.container ?? "nil"), TranscodingURL=\(ms.transcodingURL != nil ? "present" : "nil")"
+                    )
+            }
+        }
+
         guard let matchingMediaSource = response.value.mediaSources?
             .first(where: { $0.eTag == mediaSource.eTag && $0.id == mediaSource.id })
         else {
             throw JellyfinAPIError("Matching media source not in playback info")
         }
+
+        logger.info("Found matching media source with transcoding URL: \(matchingMediaSource.transcodingURL != nil)")
 
         return try matchingMediaSource.videoPlayerViewModel(with: self, playSessionID: response.value.playSessionID!)
     }
